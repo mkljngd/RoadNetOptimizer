@@ -124,4 +124,19 @@ public class RouteOptimizationTests {
     assertTrue(graph.vertexSet().isEmpty());
     assertTrue(graph.edgeSet().isEmpty());
   }
+
+  @Test
+  public void testLoaderSkipsCommentsAndBlanks() throws Exception {
+    String data = "# comment\n\n1\t2\t3.0\n";
+    BufferedReader reader = new BufferedReader(new StringReader(data));
+    Graph<Integer, DefaultWeightedEdge> g = RoadNetworkLoader.loadGraph(reader);
+    assertTrue(g.containsEdge(1, 2));
+    assertEquals(3.0, g.getEdgeWeight(g.getEdge(1, 2)), 1e-6);
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void loaderThrowsOnBadNumber() throws Exception {
+    String data = "1\tX\t3.0";
+    RoadNetworkLoader.loadGraph(new BufferedReader(new StringReader(data)));
+  }
 }
