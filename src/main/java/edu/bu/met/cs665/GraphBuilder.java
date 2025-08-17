@@ -1,10 +1,4 @@
-/**
- * Name: Mukul Jangid
- * Course: CS-665 Software Designs & Patterns
- * Date: 05/02/2024
- * File Name: GraphBuilder.java
- * Description: Provides a builder pattern for constructing graphs with weighted edges.
- */
+// Provides a builder pattern for constructing graphs with weighted edges.
 
 package edu.bu.met.cs665;
 

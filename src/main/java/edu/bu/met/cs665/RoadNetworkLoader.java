@@ -1,10 +1,4 @@
-/**
- * Name: Mukul Jangid
- * Course: CS-665 Software Designs & Patterns
- * Date: 05/02/2024
- * File Name: RoadNetworkLoader.java
- * Description: Utility class to load a graph representation of road networks from a file.
- */
+// Utility class to load a graph representation of road networks from a file.
 
 package edu.bu.met.cs665;
 

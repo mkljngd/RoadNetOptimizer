@@ -1,10 +1,4 @@
-/**
- * Name: Mukul Jangid 
- * Course: CS-665 Software Designs & Patterns 
- * Date: 04/12/2024 
- * File Name: DriverNotificationTest.java 
- * Description: Test cases for the project.
- */
+// Test cases for the project.
 
 package edu.bu.met.cs665;
 

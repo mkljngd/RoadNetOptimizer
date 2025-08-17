@@ -1,11 +1,5 @@
-/**
- * Name: Mukul Jangid
- * Course: CS-665 Software Designs & Patterns
- * Date: 05/02/2024
- * File Name: RouteCalculationExecutor.java
- * Description: Manages the execution of route calculations using different strategies on a 
- * multi-threaded environment.
- */
+// Description: Manages the execution of route calculations using different strategies on a
+// multi-threaded environment.
 
 package edu.bu.met.cs665;
 

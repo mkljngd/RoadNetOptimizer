@@ -1,8 +1,4 @@
-/**
- * Name: Mukul Jangid Course: CS-665 Software Designs & Patterns Date: 05/02/2024 File Name:
- * RouteOptimizationFacade.java Description: Facade class to simplify interactions with the route
- * calculation components.
- */
+// Facade class to simplify interactions with the route calculation components.
 package edu.bu.met.cs665;
 
 import java.io.BufferedReader;
