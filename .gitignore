@@ -1,0 +1,52 @@
+# OS / System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE / Editor
+.idea/
+*.iml
+.vscode/
+*.class
+*.project
+*.classpath
+*.settings/
+
+# Build outputs
+target/
+out/
+*.log
+*.tmp
+maven-status/
+surefire-reports/
+site/
+generated-sources/
+generated-test-sources/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+
+# Project-specific artifacts
+output.txt
+*.png
+*.jpg
+*.jpeg
+*.zip
+*.tar.gz
+
+# Logs
+*.log
+*.log.*
+
+# Node.js
+node_modules/
+
+# Backup files
+*~
