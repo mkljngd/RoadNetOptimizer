@@ -17,10 +17,9 @@ public class RouteOptimizationFacade {
    */
   public RouteOptimizationFacade() {
     System.out.println("Loading road network...");
-    try {
-      BufferedReader reader = new BufferedReader(new FileReader(DATA_FILE_PATH));
+    try (BufferedReader reader = new BufferedReader(new FileReader(DATA_FILE_PATH))) {
       graph = RoadNetworkLoader.loadGraph(reader);
-    } catch (IOException e) {
+    } catch (IOException | RuntimeException e) {
       System.err.println("Error loading graph: " + e.getMessage());
       graph = null;
     }
@@ -33,6 +32,10 @@ public class RouteOptimizationFacade {
   }
 
   public void optimizeRoute(int startVertex, int endVertex, String algorithmName) {
+    if (executor == null) {
+      System.out.println("Executor unavailable: Graph not loaded!");
+      return;
+    }
     RouteStrategy strategy = getRouteStrategy(algorithmName);
     executor.executeRouteCalculation(startVertex, endVertex, strategy);
   }
@@ -46,6 +49,7 @@ public class RouteOptimizationFacade {
   }
 
   public void shutdown() {
+    if (executor == null) return;
     executor.shutdown();
   }
 

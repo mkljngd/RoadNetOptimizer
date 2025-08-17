@@ -29,7 +29,10 @@ public class GraphBuilder<V, E> {
   public GraphBuilder<V, E> addEdge(V sourceVertex, V targetVertex, double weight) {
     graph.addVertex(sourceVertex);
     graph.addVertex(targetVertex);
-    E edge = graph.addEdge(sourceVertex, targetVertex);
+    E edge = graph.getEdge(sourceVertex, targetVertex);
+    if (edge == null) {
+      edge = graph.addEdge(sourceVertex, targetVertex);
+    }
     graph.setEdgeWeight(edge, weight);
     return this;
   }

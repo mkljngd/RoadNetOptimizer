@@ -2,6 +2,8 @@ import csv
 import networkx as nx
 import matplotlib.pyplot as plt
 
+FILE_PATH = "dataset/roadNet-CA.txt"
+
 
 def parse_graph(file_path):
     """
@@ -120,7 +122,7 @@ if __name__ == "__main__":
     """
     Main execution block: Parses a graph, reads paths from a file, and visualizes each path with its context within the graph.
     """
-    graph = parse_graph("roadNet-CA.txt")  # Ensure to use the correct file path
+    graph = parse_graph(FILE_PATH)  # Ensure to use the correct file path
     with open("output.txt", "r") as file:
         lines = file.readlines()
         for line in lines:
