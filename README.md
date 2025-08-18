@@ -92,6 +92,7 @@ This will:
 	•	Load the roadNet dataset.
 	•	Compute routes using selected strategy.
 	•	Store paths and adjacency in Redis.
+![Backend output](Images/Output1.png)
 
 ⸻
 
@@ -104,7 +105,8 @@ python visualize_graph.py
 	•	Generates a structured visualization.
 
 Example Visualization:
-(Insert screenshot of plotted graph here)
+![Python output](Images/Output2.png)
+![Route Visualization](Images/Output3.png)
 
 ⸻
 

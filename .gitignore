@@ -36,7 +36,6 @@ venv/
 
 # Project-specific artifacts
 output.txt
-*.png
 *.jpg
 *.jpeg
 *.zip
