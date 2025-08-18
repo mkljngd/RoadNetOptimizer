@@ -72,25 +72,6 @@ def extract_nodes(path_line: str) -> List[str]:
     return [p.strip() for p in s.split(" -> ") if p.strip()]
 
 
-def get_subgraph_and_connections(
-    graph: Dict[str, List[str]], nodes: List[str]
-) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-    """
-    Build a subgraph (edges with both endpoints in 'nodes') and collect
-    'additional_edges' where src in 'nodes' but dst not in 'nodes'.
-    """
-    subgraph: Dict[str, List[str]] = {}
-    additional_edges: Dict[str, List[str]] = {}
-    node_set = set(nodes)
-    for node in nodes:
-        for cn in graph.get(node, []):
-            if cn in node_set:
-                subgraph.setdefault(node, []).append(cn)
-            else:
-                additional_edges.setdefault(node, []).append(cn)
-    return subgraph, additional_edges
-
-
 # ---------- Structured layout helpers ----------
 
 
@@ -315,37 +296,40 @@ def choose_single_route(route_lines: List[str]) -> str:
 def main():
     r = connect_redis()
 
-    # 1) Build the full graph from Redis adjacency sets
-    graph = load_graph_from_redis(r, REDIS_ADJ_PREFIX)
-    if not graph:
-        print(
-            f"ERROR: No adjacency found in Redis with prefix '{REDIS_ADJ_PREFIX}'. "
-            f"Ensure your Java loader is writing 'SADD {REDIS_ADJ_PREFIX}<from> <to>'.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    graph = {}  # keep empty; no extra edges
 
-    # 2) Pull route lines from Redis (list 'routes' by default)
-    route_lines = r.lrange(REDIS_LIST_KEY, 0, -1)
+    # Only fetch the first N list items (most recent first)
+    cap = MAX_DISPLAY_ROUTES
+    total = r.llen(REDIS_LIST_KEY) or 0
+    route_lines = r.lrange(REDIS_LIST_KEY, 0, max(0, cap - 1))
+
+    print(
+        f"\nFound {total} route(s) in Redis list '{REDIS_LIST_KEY}'. Showing up to {cap}."
+    )
     if not route_lines:
         print(f"No routes found in Redis list '{REDIS_LIST_KEY}'.")
         return
 
-    # 3) Ask the user which single route to visualize
     chosen = choose_single_route(route_lines)
     if not chosen:
         print("No route selected. Goodbye.")
         return
 
-    # 4) Visualize the selected route
     nodes_in_path = extract_nodes(chosen)
     if len(nodes_in_path) < 2:
         print(f"Selected route is invalid/too short: '{chosen}'")
         return
 
-    subgraph, additional_edges = get_subgraph_and_connections(graph, nodes_in_path)
-    simplify = len(nodes_in_path) >= PATH_LONG_SIMPLIFY_THRESHOLD
+    # Build subgraph purely from the chosen path
+    subgraph = {}
+    for i in range(len(nodes_in_path) - 1):
+        a, b = nodes_in_path[i], nodes_in_path[i + 1]
+        subgraph.setdefault(a, []).append(b)
 
+    # No extra edges by default (fast)
+    additional_edges = {}
+
+    simplify = len(nodes_in_path) >= PATH_LONG_SIMPLIFY_THRESHOLD
     visualize_subgraph(
         subgraph,
         additional_edges,
@@ -355,5 +339,23 @@ def main():
     )
 
 
+def repl():
+    """Run app in a loop until user types 'exit'."""
+    try:
+        # First run immediately
+        main()
+        while True:
+            cmd = (
+                input("\nType 'exit' to quit or press Enter to visualize again: ")
+                .strip()
+                .lower()
+            )
+            if cmd == "exit":
+                break
+            main()
+    except (KeyboardInterrupt, EOFError):
+        pass
+
+
 if __name__ == "__main__":
-    main()
+    repl()
