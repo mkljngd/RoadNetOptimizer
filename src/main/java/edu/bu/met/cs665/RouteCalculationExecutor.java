@@ -21,6 +21,7 @@ public class RouteCalculationExecutor {
   private static final Logger LOGGER = Logger.getLogger(RouteCalculationExecutor.class.getName());
   private ExecutorService executor;
   private Graph<Integer, DefaultWeightedEdge> graph;
+  private final RouteSink sink;
 
   /**
    * Constructs a RouteCalculationExecutor with a graph and specified thread pool size.
@@ -28,9 +29,11 @@ public class RouteCalculationExecutor {
    * @param graph Graph to calculate routes on.
    * @param threadCount Number of threads in the pool.
    */
-  public RouteCalculationExecutor(Graph<Integer, DefaultWeightedEdge> graph, int threadCount) {
+  public RouteCalculationExecutor(
+      Graph<Integer, DefaultWeightedEdge> graph, int threadCount, RouteSink sink) {
     this.graph = graph;
     this.executor = Executors.newFixedThreadPool(threadCount);
+    this.sink = sink;
   }
 
   /**
@@ -50,7 +53,7 @@ public class RouteCalculationExecutor {
               String formattedRoute = formatRoute(route);
               LOGGER.info(
                   "Route from " + startVertex + " to " + endVertex + ":\n" + formattedRoute);
-              appendRouteToFile(formattedRoute);
+              sink.saveRoute(startVertex, endVertex, route);
             } else {
               LOGGER.info("No available route from " + startVertex + " to " + endVertex);
             }
@@ -64,25 +67,19 @@ public class RouteCalculationExecutor {
     return "Path: " + route.stream().map(Object::toString).collect(Collectors.joining(" -> "));
   }
 
-  private void appendRouteToFile(String route) {
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt", true))) {
-      writer.write(route);
-      writer.newLine();
-    } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to write to file", e);
-    }
-  }
-
   /** Terminates the executor, ensuring active tasks complete before shutdown. */
   public void shutdown() {
     executor.shutdown();
     try {
-      if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-        executor.shutdownNow();
-      }
+      if (!executor.awaitTermination(60, TimeUnit.SECONDS)) executor.shutdownNow();
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       LOGGER.log(Level.SEVERE, "Thread was interrupted", e);
+    } finally {
+      try {
+        sink.close();
+      } catch (Exception ignore) {
+      }
     }
   }
 }

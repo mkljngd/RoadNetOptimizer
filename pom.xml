@@ -60,6 +60,8 @@ file conforms to. -->
      This property is used by the Maven Checkstyle Plugin to configure the Sevntu
      Checkstyle rules. -->
         <sevntu.checkstyle.plugin.version>1.29.0</sevntu.checkstyle.plugin.version>
+        <jedis.version>5.1.0</jedis.version>
+
     </properties>
     <!-- The <reporting> element is used to configure the reporting plugins that generate
      reports based on the project's build results. These reports can include things
@@ -206,7 +208,20 @@ file conforms to. -->
             <artifactId>jgraphx</artifactId>
             <version>4.2.2</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.19.0</version>
+        </dependency>
     </dependencies>
 </project>

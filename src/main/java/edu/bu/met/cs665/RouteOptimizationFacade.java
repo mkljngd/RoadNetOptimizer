@@ -25,7 +25,21 @@ public class RouteOptimizationFacade {
     }
     if (graph != null) {
       System.out.println("Graph loaded successfully.");
-      executor = new RouteCalculationExecutor(graph, 10);
+      // Redis config: system props override env, with sensible defaults
+      String host =
+          System.getProperty("redis.host", System.getenv().getOrDefault("REDIS_HOST", "localhost"));
+      int port =
+          Integer.parseInt(
+              System.getProperty("redis.port", System.getenv().getOrDefault("REDIS_PORT", "6379")));
+      String password =
+          System.getProperty("redis.password", System.getenv().getOrDefault("REDIS_PASSWORD", ""));
+      String listKey =
+          System.getProperty(
+              "redis.listKey", System.getenv().getOrDefault("REDIS_LIST_KEY", "routes"));
+      Integer ttlSeconds = null; // or Integer.valueOf(86400);
+
+      RouteSink sink = new RedisRouteSink(host, port, password, listKey, ttlSeconds);
+      executor = new RouteCalculationExecutor(graph, 10, sink);
     } else {
       System.out.println("Failed to load graph.");
     }

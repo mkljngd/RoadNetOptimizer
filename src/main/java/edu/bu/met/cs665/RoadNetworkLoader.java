@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import redis.clients.jedis.JedisPooled;
 
 public class RoadNetworkLoader {
 
@@ -22,9 +23,13 @@ public class RoadNetworkLoader {
     int linesProcessed = 0;
     String line;
 
+    // Grab a client once
+    JedisPooled jedis = RedisClient.get(); // thread-safe pool in Jedis 5
+
     while ((line = reader.readLine()) != null) {
       line = line.trim();
       if (line.isEmpty() || line.startsWith("#")) continue;
+
       String[] parts = line.split("\t");
       if (parts.length < 2 || parts.length > 3) {
         throw new IllegalArgumentException("Invalid line:" + line);
@@ -33,13 +38,19 @@ public class RoadNetworkLoader {
       int fromNodeId = Integer.parseInt(parts[0]);
       int toNodeId = Integer.parseInt(parts[1]);
       double weight = parts.length == 3 ? Double.parseDouble(parts[2]) : 1.0;
+
+      // Build in-memory graph (unchanged)
       builder.addEdge(fromNodeId, toNodeId, weight);
+
+      // NEW: persist adjacency in Redis
+      // Set of neighbors for the source node
+      jedis.sadd("adj:" + fromNodeId, Integer.toString(toNodeId));
+
       linesProcessed++;
       if (linesProcessed % 1_000_000 == 0) {
         System.out.println("Processed " + linesProcessed + " lines...");
       }
     }
-
     return builder.build();
   }
 }
