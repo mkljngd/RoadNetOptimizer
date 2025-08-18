@@ -21,7 +21,6 @@ public class RedisRouteSink implements RouteSink {
         (password == null || password.isEmpty())
             ? String.format("redis://%s:%d/%d", host, port, db)
             : String.format("redis://:%s@%s:%d/%d", password, host, port, db);
-    System.out.println("URI1: " + uri);
 
     this.pool = new JedisPool(new JedisPoolConfig(), URI.create(uri));
     this.listKey = listKey;
