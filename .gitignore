@@ -23,6 +23,7 @@ surefire-reports/
 site/
 generated-sources/
 generated-test-sources/
+*.html
 
 # Python
 __pycache__/
