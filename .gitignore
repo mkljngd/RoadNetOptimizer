@@ -40,6 +40,7 @@ output.txt
 *.jpeg
 *.zip
 *.tar.gz
+.env
 
 # Logs
 *.log

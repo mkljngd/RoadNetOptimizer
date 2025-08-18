@@ -4,12 +4,13 @@
 import os
 import sys
 from typing import Dict, List, Tuple
-
+from dotenv import load_dotenv
 import redis
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
+load_dotenv()
 # ---------- Config ----------
 REDIS_LIST_KEY = os.getenv("REDIS_LIST_KEY", "routes")  # list of "Path: 1 -> 2 -> 3"
 REDIS_ADJ_PREFIX = os.getenv(

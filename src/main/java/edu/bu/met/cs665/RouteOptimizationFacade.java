@@ -1,6 +1,7 @@
 // Facade class to simplify interactions with the route calculation components.
 package edu.bu.met.cs665;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,6 +17,8 @@ public class RouteOptimizationFacade {
    * Initializes the facade, loading a graph from a file and setting up an executor if successful.
    */
   public RouteOptimizationFacade() {
+    Dotenv dotenv = Dotenv.load();
+
     System.out.println("Loading road network...");
     try (BufferedReader reader = new BufferedReader(new FileReader(DATA_FILE_PATH))) {
       graph = RoadNetworkLoader.loadGraph(reader);
@@ -26,16 +29,10 @@ public class RouteOptimizationFacade {
     if (graph != null) {
       System.out.println("Graph loaded successfully.");
       // Redis config: system props override env, with sensible defaults
-      String host =
-          System.getProperty("redis.host", System.getenv().getOrDefault("REDIS_HOST", "localhost"));
-      int port =
-          Integer.parseInt(
-              System.getProperty("redis.port", System.getenv().getOrDefault("REDIS_PORT", "6379")));
-      String password =
-          System.getProperty("redis.password", System.getenv().getOrDefault("REDIS_PASSWORD", ""));
-      String listKey =
-          System.getProperty(
-              "redis.listKey", System.getenv().getOrDefault("REDIS_LIST_KEY", "routes"));
+      String host = dotenv.get("REDIS_HOST", "localhost");
+      int port = Integer.parseInt(dotenv.get("REDIS_PORT", "6379"));
+      String password = dotenv.get("REDIS_PASSWORD", "");
+      String listKey = dotenv.get("REDIS_LIST_KEY", "routes");
       Integer ttlSeconds = null; // or Integer.valueOf(86400);
 
       RouteSink sink = new RedisRouteSink(host, port, password, listKey, ttlSeconds);

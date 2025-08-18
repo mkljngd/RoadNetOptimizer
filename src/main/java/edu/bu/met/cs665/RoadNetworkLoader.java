@@ -6,7 +6,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import redis.clients.jedis.JedisPooled;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
 public class RoadNetworkLoader {
 
@@ -24,33 +25,36 @@ public class RoadNetworkLoader {
     String line;
 
     // Grab a client once
-    JedisPooled jedis = RedisClient.get(); // thread-safe pool in Jedis 5
+    try (Jedis jedis = RedisPools.get().getResource()) {
+      Pipeline p = jedis.pipelined();
+      while ((line = reader.readLine()) != null) {
+        line = line.trim();
+        if (line.isEmpty() || line.startsWith("#")) continue;
 
-    while ((line = reader.readLine()) != null) {
-      line = line.trim();
-      if (line.isEmpty() || line.startsWith("#")) continue;
+        String[] parts = line.split("\t");
+        if (parts.length < 2 || parts.length > 3) {
+          throw new IllegalArgumentException("Invalid line:" + line);
+        }
 
-      String[] parts = line.split("\t");
-      if (parts.length < 2 || parts.length > 3) {
-        throw new IllegalArgumentException("Invalid line:" + line);
+        int fromNodeId = Integer.parseInt(parts[0]);
+        int toNodeId = Integer.parseInt(parts[1]);
+        double weight = parts.length == 3 ? Double.parseDouble(parts[2]) : 1.0;
+
+        // Build in-memory graph (unchanged)
+        builder.addEdge(fromNodeId, toNodeId, weight);
+
+        // NEW: persist adjacency in Redis
+        // Set of neighbors for the source node
+        p.sadd("adj:" + fromNodeId, Integer.toString(toNodeId));
+
+        if (++linesProcessed % 1_000_000 == 0) {
+          p.sync();
+          System.out.println("Processed " + linesProcessed + " lines...");
+        }
       }
-
-      int fromNodeId = Integer.parseInt(parts[0]);
-      int toNodeId = Integer.parseInt(parts[1]);
-      double weight = parts.length == 3 ? Double.parseDouble(parts[2]) : 1.0;
-
-      // Build in-memory graph (unchanged)
-      builder.addEdge(fromNodeId, toNodeId, weight);
-
-      // NEW: persist adjacency in Redis
-      // Set of neighbors for the source node
-      jedis.sadd("adj:" + fromNodeId, Integer.toString(toNodeId));
-
-      linesProcessed++;
-      if (linesProcessed % 1_000_000 == 0) {
-        System.out.println("Processed " + linesProcessed + " lines...");
-      }
+      p.sync();
     }
+
     return builder.build();
   }
 }
